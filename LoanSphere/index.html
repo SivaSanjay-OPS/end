@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LoanSphere — Landing</title>
+
+<!-- Shared CSS -->
+<link rel="stylesheet" href="css/common.css"/>
+<link rel="stylesheet" href="css/animations.css"/>
+
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>LoanSphere</h1>
+
+    <div class="role-select">
+      <label for="role">Open:</label>
+      <select id="role">
+        <option value="">-- choose role --</option>
+        <option value="admin">Admin</option>
+        <option value="lender">Lender</option>
+        <option value="borrower">Borrower</option>
+        <option value="analyst">Financial Analyst</option>
+        <option value="hr">HR</option>
+      </select>
+
+      <button id="openBtn">Open</button>
+    </div>
+  </header>
+
+  <main>
+    <p>This is a frontend-only loan management system. No backend.  
+    All data stays in <strong>localStorage</strong>.</p>
+
+    <ul>
+      <li><strong>Admin</strong> — Review documents, accept/reject, oversee loans.</li>
+      <li><strong>Lender</strong> — Create and publish loan offers.</li>
+      <li><strong>Borrower</strong> — Apply, upload PDFs/Images, view payments.</li>
+      <li><strong>Analyst</strong> — Visual charts & loan statistics.</li>
+      <li><strong>HR</strong> — Manage user roles.</li>
+    </ul>
+  </main>
+
+  <footer>LoanSphere — Pure Frontend System</footer>
+</div>
+
+<script src="js/common.js"></script>
+
+</body>
+</html>

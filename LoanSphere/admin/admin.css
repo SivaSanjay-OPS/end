@@ -1,0 +1,43 @@
+/* admin.css - Admin specific styles */
+
+h2 { margin-bottom: 8px; }
+
+.pending-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed #cfe8ff;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, rgba(250,255,255,0.6), rgba(245,252,255,0.35));
+}
+
+.pending-meta { font-size: 14px; color: #222; }
+
+.action-block { display:flex; gap:8px; align-items:center; max-width:380px; }
+
+.action-block textarea {
+  width: 220px;
+  min-height:56px;
+  resize:vertical;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #e6eef8;
+}
+
+.small-muted { font-size:12px; color:#666; margin-top:6px; }
+
+.user-card {
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #eef4fb;
+  margin-bottom:8px;
+}
+
+.loan-card {
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #eefaf0;
+  margin-bottom:8px;
+}

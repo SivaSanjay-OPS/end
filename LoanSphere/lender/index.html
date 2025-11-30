@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lender — LoanSphere</title>
+
+  <link rel="stylesheet" href="../css/common.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link rel="stylesheet" href="lender.css" />
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <h1>Lender Dashboard</h1>
+      <div class="row">
+        <button id="homeBtn">Home</button>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- Create Offer Section -->
+      <section class="card">
+        <h2>Create Loan Offer</h2>
+
+        <div class="row">
+          <input id="title" placeholder="Offer Title">
+          <input id="principal" placeholder="Principal (₹)">
+          <input id="rate" placeholder="Interest Rate (%)">
+          <input id="term" placeholder="Duration (Months)">
+          <button id="create" class="btn-float">Create</button>
+        </div>
+      </section>
+
+      <!-- Offer List -->
+      <section class="card">
+        <h2>Your Offers</h2>
+        <div id="offers"></div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="../js/common.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="lender.js"></script>
+</body>
+
+</html>

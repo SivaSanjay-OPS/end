@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LoanSphere — Single Page App (Frontend Only) — Enhanced</title>
+
+<!-- =======================
+     Styles (single-file) — improved visuals + animations
+     - glassmorphism, depth, soft gradients
+     - motion for cards, nav, buttons, forms
+     - custom animated cursor & ripple
+======================= -->
+<style>
+:root{
+  --bg-0: #eaf3ff;        /* very light sky */
+  --bg-1: #f7fbff;        /* panel gradient top */
+  --panel: rgba(255,255,255,0.9);
+  --muted:#6b7280;
+  --accent-blue:#0b76ff;
+  --accent-blue-600:#055ac8;
+  --accent-green:#0bb07b;
+  --accent-red:#e03d3d;
+  --accent-purple:#6d28d9;
+  --glass: rgba(255,255,255,0.6);
+  --glass-2: rgba(255,255,255,0.85);
+  --radius:14px;
+  --card-shadow: 0 18px 40px rgba(11,34,80,0.08);
+  --soft-shadow: 0 8px 18px rgba(12,22,40,0.06);
+  --maxw:1200px;
+  --ui-gap:12px;
+  --glass-border: rgba(11,118,255,0.06);
+  --cursor-ring: rgba(11,118,255,0.14);
+  --transition: 220ms cubic-bezier(.2,.9,.3,1);
+}
+
+/* reset & base */
+*{box-sizing:border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Arial,Helvetica,sans-serif;background:
+  radial-gradient(1200px 400px at 10% 10%, #f0f7ff 0%, transparent 18%),
+  linear-gradient(180deg,var(--bg-0), #ffffff 40%);
+  color:#061025; -webkit-tap-highlight-color:transparent; font-size:15px}
+a{color:inherit}
+button{font-family:inherit}
+
+/* app frame */
+.app{
+  max-width:var(--maxw);
+  margin:28px auto;
+  border-radius:18px;
+  overflow:hidden;
+  display:flex;
+  min-height:680px;
+  background: linear-gradient(180deg,var(--bg-1), #ffffff 60%);
+  box-shadow: var(--card-shadow);
+  transform-origin:center;
+  transition: transform 400ms ease;
+  border: 1px solid rgba(12,22,40,0.03);
+}
+
+/* subtle entrance */
+.app.ready{ transform: translateY(0); opacity:1 }
+.app:not(.ready){ transform: translateY(8px); opacity:0.98 }
+
+/* left nav */
+.left{
+  width:250px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.55));
+  padding:20px;
+  border-right:1px solid rgba(11,118,255,0.04);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:52px;height:52px;border-radius:12px;
+  background: linear-gradient(135deg,var(--accent-blue), #005ecc);
+  display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
+  box-shadow: 0 6px 18px rgba(11,118,255,0.18), inset 0 -4px 10px rgba(0,0,0,0.06);
+  transition: transform var(--transition);
+}
+.logo:hover{ transform: translateY(-3px) scale(1.02) }
+.app-title{font-weight:800;letter-spacing:0.2px}
+.small{font-size:13px;color:var(--muted);line-height:1.1}
+
+/* nav buttons */
+.nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.nav-btn{
+  background:transparent;border:0;padding:10px;border-radius:10px;text-align:left;cursor:pointer;font-weight:700;color:#082035;
+  display:flex;align-items:center;gap:10px;position:relative;
+  transition: background var(--transition), transform 260ms cubic-bezier(.2,.9,.3,1), box-shadow var(--transition);
+}
+.nav-btn::before{
+  content:""; width:6px;height:6px;border-radius:50%; background:transparent; display:inline-block; margin-right:6px; transform:translateY(2px);
+  transition: background var(--transition), transform var(--transition);
+}
+.nav-btn:hover{ transform: translateX(6px) }
+.nav-btn.active{
+  background: linear-gradient(90deg, rgba(11,118,255,0.06), rgba(11,118,255,0.02));
+  box-shadow: 0 6px 18px rgba(11,118,255,0.06);
+  color: var(--accent-blue-600);
+}
+.nav-btn.active::before{ background: var(--accent-blue) ; transform: scale(1.2) translateY(0) }
+
+/* footer */
+.foot{margin-top:auto;font-size:13px;color:var(--muted)}
+
+/* main content */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid rgba(12,22,40,0.03);
+  background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4));
+  backdrop-filter: blur(6px);
+}
+.top-left{display:flex;flex-direction:column}
+.title{font-size:18px;font-weight:800}
+.subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* search & profile */
+.top-right{display:flex;align-items:center;gap:12px}
+.search{
+  padding:10px 14px;border-radius:12px;border:1px solid rgba(12,22,40,0.06);min-width:260px;
+  transition: box-shadow var(--transition), transform var(--transition);
+  background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,255,0.9));
+  outline: none;
+}
+.search:focus{ box-shadow: 0 8px 30px rgba(11,118,255,0.08); transform: translateY(-2px) }
+.profile{
+  width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0b76ff,#0a66d6);
+  color:white;display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:var(--soft-shadow);
+  transform-origin:center; transition: transform var(--transition);
+}
+.profile:hover{ transform: translateY(-3px) }
+
+/* content area */
+.content{padding:20px;overflow:auto}
+.header-cards{display:flex;gap:14px;margin-bottom:14px}
+.card{
+  flex:1;background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.95));
+  padding:14px;border-radius:12px;box-shadow:var(--soft-shadow);
+  transition: transform var(--transition), box-shadow var(--transition);
+  border:1px solid rgba(12,22,40,0.03);
+}
+.card:hover{ transform: translateY(-6px); box-shadow: 0 16px 36px rgba(10,20,60,0.06) }
+.card h3{margin:0 0 8px 0;font-size:13px;color:var(--muted)}
+.metric{font-size:22px;font-weight:800}
+
+/* rows/cols */
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.col{flex:1;min-width:220px}
+
+/* panels */
+.panel{display:none;animation:panelIn 320ms ease both}
+.panel.active{display:block}
+@keyframes panelIn{ from{ opacity:0; transform: translateY(6px) } to{ opacity:1; transform:none } }
+
+/* small items */
+.list{display:flex;flex-direction:column;gap:10px}
+.item{
+  background:#fff;padding:12px;border-radius:10px;border:1px solid rgba(12,22,40,0.03);
+  box-shadow: 0 6px 16px rgba(10,20,40,0.03);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.item:hover{ transform: translateY(-6px); box-shadow: 0 18px 36px rgba(10,20,40,0.04) }
+
+.btn{padding:9px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;letter-spacing:0.1px;transition: transform 160ms var(--transition), box-shadow var(--transition); position:relative; overflow:hidden}
+.btn:active{ transform: translateY(1px) }
+.btn.primary{background:linear-gradient(90deg,var(--accent-blue),var(--accent-blue-600));color:#fff;box-shadow: 0 10px 26px rgba(11,118,255,0.14)}
+.btn.ok{background:linear-gradient(90deg,var(--accent-green),#07a667);color:#fff}
+.btn.warn{background:linear-gradient(90deg,var(--accent-orange),#e86a15);color:#fff}
+.btn.danger{background:linear-gradient(90deg,var(--accent-red),#c92f2f);color:#fff}
+
+/* ripple (JS creates span.ripple) */
+.ripple{
+  position:absolute;border-radius:999px; transform: translate(-50%,-50%) scale(0);
+  pointer-events:none; opacity:0.5; will-change: transform, opacity;
+  animation: rippleOut 700ms ease;
+  background: rgba(255,255,255,0.5);
+}
+@keyframes rippleOut{ to{ transform: translate(-50%,-50%) scale(6); opacity:0 } }
+
+/* forms & inputs */
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.input,select,textarea{padding:10px;border-radius:10px;border:1px solid rgba(12,22,40,0.06);min-width:0;outline:none;background:rgba(255,255,255,0.9)}
+.input:focus, select:focus, textarea:focus{ box-shadow: 0 8px 22px rgba(11,118,255,0.06); transform: translateY(-2px) }
+
+/* plan boxes */
+.plan-grid{display:flex;gap:12px;flex-wrap:wrap}
+.plan{
+  flex:1;min-width:180px;border-radius:12px;padding:14px;background: linear-gradient(180deg,#ffffff, #fbfeff);
+  border:1px solid rgba(11,118,255,0.04); transition: transform var(--transition), box-shadow var(--transition);
+}
+.plan:hover{ transform: translateY(-8px); box-shadow: 0 18px 36px rgba(11,118,255,0.06) }
+.plan .title{font-weight:800}
+.plan .price{font-size:20px;margin-top:6px}
+
+/* table */
+.table{width:100%;border-collapse:collapse;margin-top:8px}
+.table th,.table td{padding:8px;border-bottom:1px solid rgba(12,22,40,0.04);text-align:left;font-size:13px}
+
+/* canvas area */
+.canvas-wrap{background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(250,250,255,0.9)); padding:12px;border-radius:12px;border:1px solid rgba(12,22,40,0.03); box-shadow: var(--soft-shadow) }
+
+/* small utilities */
+.note{font-size:13px;color:var(--muted)}
+.summary{font-size:14px;color:#111;margin-top:8px}
+
+/* responsive */
+@media (max-width:980px){
+  .left{display:none}
+  .app{margin:12px}
+  .top-right .search{display:none}
+  .header-cards{flex-direction:column}
+}
+
+/* animated entry for elements (stagger) */
+.fade-up{ opacity:0; transform: translateY(8px); animation: fadeUp 420ms ease forwards }
+.fade-up.delay-1{ animation-delay:60ms } .fade-up.delay-2{ animation-delay:120ms } .fade-up.delay-3{ animation-delay:180ms }
+@keyframes fadeUp{ to{ opacity:1; transform:none } }
+
+/* ---- Animated cursor (custom) ---- */
+.cursor-ring{
+  pointer-events:none;
+  position: fixed;
+  left: 0; top: 0;
+  width: 40px; height: 40px; border-radius:50%;
+  transform: translate(-50%,-50%) scale(1);
+  transition: transform 160ms var(--transition), opacity 160ms linear;
+  z-index:9999;
+  mix-blend-mode: normal;
+  display:block;
+  filter: drop-shadow(0 6px 18px rgba(11,118,255,0.12));
+}
+.cursor-ring::after{
+  content:"";
+  position:absolute; inset:0; border-radius:50%;
+  border:2px solid var(--cursor-ring); box-sizing:border-box;
+}
+.cursor-dot{
+  position: fixed; left:0; top:0; width:8px;height:8px;border-radius:50%;
+  transform: translate(-50%,-50%); z-index:10000; pointer-events:none;
+  background: var(--accent-blue);
+  box-shadow: 0 4px 18px rgba(11,118,255,0.18);
+}
+
+/* cursor sizes for interactive targets */
+.cursor-ring--small{ width:28px; height:28px }
+.cursor-ring--large{ width:72px; height:72px; opacity:0.96 }
+.cursor-ring--hidden{ opacity:0 }
+
+/* when hovering actionable elements */
+a:hover ~ .cursor-ring, button:hover ~ .cursor-ring, .btn:hover ~ .cursor-ring { transform: translate(-50%,-50%) scale(1.18); }
+button:active ~ .cursor-ring{ transform: translate(-50%,-50%) scale(0.92) }
+.nav-btn.active ~ .cursor-ring{ background: transparent }
+
+/* keyboard: hide cursor when using keyboard focus */
+:root[data-input-mode="keyboard"] .cursor-ring,
+:root[data-input-mode="keyboard"] .cursor-dot { opacity: 0; pointer-events:none }
+
+/* focus outlines for keyboard users */
+:root[data-input-mode="keyboard"] .nav-btn:focus,
+:root[data-input-mode="keyboard"] .btn:focus,
+:root[data-input-mode="keyboard"] .input:focus { outline: 3px solid rgba(11,118,255,0.12); border-radius:10px }
+
+/* subtle decorative background shapes */
+.bg-deco{
+  pointer-events:none;
+  position:absolute; inset:auto 0 0 -10%;
+  height:240px; z-index:0; opacity:0.12;
+  background: radial-gradient(600px 150px at 10% 20%, rgba(11,118,255,0.12), transparent 20%),
+              radial-gradient(420px 120px at 90% 60%, rgba(107,40,217,0.06), transparent 20%);
+  mix-blend-mode: screen;
+}
+</style>
+</head>
+<body>
+
+<!-- decorative background shapes -->
+<div class="bg-deco" aria-hidden="true"></div>
+
+<div class="app" role="application" aria-label="LoanSphere SPA">
+  <!-- LEFT NAV -->
+  <aside class="left" aria-label="Main navigation">
+    <div class="brand">
+      <div class="logo" title="LoanSphere">LS</div>
+      <div>
+        <div class="app-title">LoanSphere</div>
+        <div class="small">Frontend Demo — Enhanced</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav" aria-label="Primary">
+      <button class="nav-btn active" data-panel="dashboard">Dashboard</button>
+      <button class="nav-btn" data-panel="lender">Lender</button>
+      <button class="nav-btn" data-panel="borrower">Borrower</button>
+      <button class="nav-btn" data-panel="admin">Admin</button>
+      <button class="nav-btn" data-panel="analyst">Analyst</button>
+      <button class="nav-btn" data-panel="hr">HR</button>
+    </nav>
+
+    <div class="foot">No backend • localStorage • PDF/JPG/PNG uploads</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" role="main">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="title">LoanSphere</div>
+        <div class="subtitle">Loan issuance, tracking & analysis — single page</div>
+      </div>
+      <div class="top-right">
+        <input id="globalSearch" class="search" placeholder="Search loans, users..." aria-label="Search loans and users" />
+        <div class="profile" id="profile" aria-hidden="true">A</div>
+      </div>
+    </header>
+
+    <section class="content">
+      <!-- Header metrics -->
+      <div class="header-cards fade-up delay-1">
+        <div class="card">
+          <h3>Total Loans</h3><div class="metric" id="mTotalLoans">0</div>
+          <div class="small">Total loan records</div>
+        </div>
+        <div class="card">
+          <h3>Pending Docs</h3><div class="metric" id="mPendingDocs">0</div>
+          <div class="small">Awaiting admin review</div>
+        </div>
+        <div class="card">
+          <h3>Active Offers</h3><div class="metric" id="mOffers">0</div>
+          <div class="small">Published in marketplace</div>
+        </div>
+      </div>
+
+      <!-- PANELS: toggled by nav -->
+      <section id="dashboard" class="panel active" aria-live="polite">
+        <div class="card">
+          <h3>Overview</h3>
+          <p class="summary">Welcome. Use the left nav to switch sections. All dashboards are on this page (no page loads).</p>
+          <div class="row" style="margin-top:10px">
+            <div class="col">
+              <div class="small">Recent Loans</div>
+              <div id="recentLoans" class="list"></div>
+            </div>
+
+            <div style="width:320px">
+              <div class="small">Pending Documents</div>
+              <div id="dashPending" class="list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="lender" class="panel" aria-hidden="true">
+        <div class="card">
+          <h3>Lender — Create Offers & Manage</h3>
+          <div class="form-row" style="margin-top:8px">
+            <input id="offerTitle" class="input" placeholder="Offer title (eg. Student Loan)" />
+            <input id="offerPrincipal" class="input" inputmode="numeric" placeholder="Principal (₹)" />
+            <input id="offerRate" class="input" inputmode="numeric" placeholder="Annual rate (%)" />
+            <input id="offerTerm" class="input" inputmode="numeric" placeholder="Term (months)" />
+            <button id="createOffer" class="btn primary">Create Offer</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>My Offers</h4>
+            <div id="offersList" class="list"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>Marketplace (published)</h4>
+            <div id="marketList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="borrower" class="panel" aria-hidden="true">
+        <div class="card">
+          <h3>Borrower — Plans, Apply, Documents, Credit Score</h3>
+
+          <div>
+            <h4>Plans</h4>
+            <div class="plan-grid" id="plansArea">
+              <!-- JS populates -->
+            </div>
+            <div class="note">Choose a plan and Apply. EMI is auto-calculated (amortized monthly).</div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>Marketplace Offers</h4>
+            <div id="borrowMarket" class="list"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>Upload Documents (PDF / JPG / PNG, max 4MB)</h4>
+            <div class="form-row">
+              <input id="bName" class="input" placeholder="Your full name" />
+              <input id="bEmail" class="input" placeholder="Your email" />
+            </div>
+            <div class="form-row" style="margin-top:8px">
+              <input id="bFile" type="file" accept=".pdf,image/png,image/jpeg" />
+              <button id="uploadDoc" class="btn ok">Upload</button>
+            </div>
+            <div id="uploadMsg" class="small"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>My Loans & Payments</h4>
+            <div id="myLoans" class="list"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>Your Credit Score (simulated)</h4>
+            <div id="creditScore" class="item">Score: <strong id="scoreVal">—</strong></div>
+            <div class="note">Score updates with document acceptance and repayment history.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="admin" class="panel" aria-hidden="true">
+        <div class="card">
+          <h3>Admin — Document Reviews & Loan Oversight</h3>
+
+          <div>
+            <h4>Pending Document Reviews</h4>
+            <div id="pendingQueue" class="list"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>All Loans</h4>
+            <div id="adminLoans" class="list"></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>All Users</h4>
+            <div id="adminUsers" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="analyst" class="panel" aria-hidden="true">
+        <div class="card">
+          <h3>Analyst — Quick Charts & Exports</h3>
+          <div class="canvas-wrap">
+            <canvas id="analystCanvas" width="720" height="200" aria-hidden="true"></canvas>
+          </div>
+          <div style="margin-top:10px" class="row">
+            <button id="exportLoans" class="btn primary">Export Loans CSV</button>
+            <button id="exportPayments" class="btn">Export Payments CSV</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="hr" class="panel" aria-hidden="true">
+        <div class="card">
+          <h3>HR — Manage Users & Roles</h3>
+          <div id="hrUsers" class="list"></div>
+        </div>
+      </section>
+
+    </section>
+  </main>
+</div>
+
+<!-- Custom cursor elements (controlled by JS) -->
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+<div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+<!-- =======================
+     App logic (keeps original behaviour)
+     - small additions: ripple, cursor interactivity, subtle animations
+======================= -->
+<script>
+/* =========================
+   Storage helpers & seeds (unchanged)
+   ========================= */
+const DB = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)||'null') }catch(e){ return null } },
+  set(k,v){ localStorage.setItem(k, JSON.stringify(v)) },
+  add(k,v){ const list = DB.get(k) || []; list.push(v); DB.set(k,list); return list }
+};
+
+(function seed(){
+  if(!DB.get('offers')) DB.set('offers', [
+    {id:1,title:'Standard Student',principal:50000,rate:10,term:24,owner:'LenderA'},
+    {id:2,title:'Quick Personal',principal:20000,rate:16,term:12,owner:'LenderA'}
+  ]);
+  if(!DB.get('market')) DB.set('market', [ ...DB.get('offers') ]);
+  if(!DB.get('loans')) DB.set('loans', []);
+  if(!DB.get('users')) DB.set('users', []);
+  if(!DB.get('pendingDocs')) DB.set('pendingDocs', []);
+  if(!DB.get('reviewedDocs')) DB.set('reviewedDocs', []);
+  if(!DB.get('transactions')) DB.set('transactions', []);
+})();
+
+/* =========================
+   UI helpers & navigation
+   ========================= */
+function $(sel){ return document.querySelector(sel) }
+function $all(sel){ return Array.from(document.querySelectorAll(sel)) }
+
+const navBtns = $all('.nav-btn');
+navBtns.forEach(b=> b.addEventListener('click', ()=> switchPanel(b.dataset.panel)));
+
+function switchPanel(panel){
+  navBtns.forEach(nb=> nb.classList.toggle('active', nb.dataset.panel===panel));
+  $all('.panel').forEach(p=> p.classList.toggle('active', p.id===panel));
+  refreshAll();
+}
+
+/* update header metrics */
+function refreshMetrics(){
+  const loans = DB.get('loans')||[];
+  const pending = DB.get('pendingDocs')||[];
+  const offers = DB.get('market')||[];
+  $('#mTotalLoans').textContent = loans.length;
+  $('#mPendingDocs').textContent = pending.length;
+  $('#mOffers').textContent = offers.length;
+}
+
+/* =========================
+   Dashboard overview
+   ========================= */
+function renderRecentLoans(){
+  const recent = (DB.get('loans')||[]).slice(-6).reverse();
+  const container = $('#recentLoans'); container.innerHTML='';
+  if(!recent.length) container.innerHTML='<div class="small">No loans yet.</div>';
+  recent.forEach(l=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(l.title)}</strong><div class="small">${escapeHtml(l.borrowerName||'—')} • ₹${l.principal} • ${l.rate}%</div></div>`;
+    container.appendChild(el);
+  });
+}
+function renderDashPending(){
+  const pending = DB.get('pendingDocs')||[]; const container = $('#dashPending'); container.innerHTML='';
+  if(!pending.length) container.innerHTML='<div class="small">No pending documents.</div>';
+  pending.slice(-6).reverse().forEach(p=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(p.name)}</strong><div class="small">From: ${escapeHtml(p.borrower)} • ${new Date(p.date).toLocaleString()}</div></div>
+      <div style="margin-top:8px"><a href="${p.data}" target="_blank" rel="noopener">View</a></div>`;
+    container.appendChild(el);
+  });
+}
+
+/* =========================
+   Lender
+   ========================= */
+$('#createOffer').addEventListener('click', ()=> {
+  const title = $('#offerTitle').value.trim();
+  const p = Number($('#offerPrincipal').value);
+  const r = Number($('#offerRate').value);
+  const t = Number($('#offerTerm').value);
+  if(!title || !p || !r || !t) return alert('Fill all offer fields');
+  const id = Date.now();
+  const offer = {id,title,principal:p,rate:r,term:t,owner:'You'};
+  const offers = DB.get('offers')||[]; offers.push(offer); DB.set('offers', offers);
+  animateBtn($('#createOffer'));
+  alert('Offer created — publish to marketplace below if desired');
+  renderOffers(); renderMarket();
+  refreshMetrics();
+});
+
+function renderOffers(){
+  const offers = DB.get('offers')||[]; const container = $('#offersList'); container.innerHTML='';
+  if(!offers.length) container.innerHTML='<div class="small">No offers created.</div>';
+  offers.forEach(o=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(o.title)}</strong><div class="small">₹${o.principal} • ${o.rate}% • ${o.term} months</div></div>
+      <div class="actions" style="margin-top:8px">
+        <button class="btn" data-id="${o.id}" onclick="publishOffer(${o.id})">Publish</button>
+        <button class="btn" onclick="deleteOffer(${o.id})">Delete</button>
+      </div>`;
+    container.appendChild(el);
+  });
+}
+function renderMarket(){
+  const market = DB.get('market')||[]; const container = $('#marketList'); container.innerHTML='';
+  if(!market.length) container.innerHTML='<div class="small">No marketplace offers.</div>';
+  market.forEach(m=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(m.title)}</strong><div class="small">₹${m.principal} • ${m.rate}% • ${m.term} months</div></div>
+      <div class="actions" style="margin-top:8px">
+        <button class="btn primary" onclick="applyFromMarket(${m.id})">Apply (demo)</button>
+      </div>`;
+    container.appendChild(el);
+  });
+}
+function publishOffer(id){
+  const offer = (DB.get('offers')||[]).find(o=> o.id==id);
+  if(!offer) return alert('Not found'); const market = DB.get('market')||[]; market.push(offer); DB.set('market', market); renderMarket(); refreshMetrics(); alert('Published to marketplace');
+}
+function deleteOffer(id){
+  let offers = DB.get('offers')||[]; offers = offers.filter(o=> o.id!=id); DB.set('offers', offers); renderOffers(); renderMarket(); refreshMetrics();
+}
+
+/* =========================
+   Borrower — plans, apply, upload, credit score
+   ========================= */
+const PLANS = [
+  {id:'planA', title:'Starter Student', principal:30000, rate:9.5, term:24, desc:'Low-rate student plan'},
+  {id:'planB', title:'Grad Personal', principal:60000, rate:12, term:36, desc:'Flexible personal loan'},
+  {id:'planC', title:'Quick Cash', principal:15000, rate:18, term:6, desc:'Fast small loans'}
+];
+
+function renderPlans(){
+  const area = $('#plansArea'); area.innerHTML='';
+  PLANS.forEach(p=>{
+    const box = document.createElement('div'); box.className='plan';
+    box.innerHTML = `<div class="title">${escapeHtml(p.title)}</div><div class="small">${escapeHtml(p.desc)}</div><div class="price">₹${p.principal}</div>
+      <div class="small">Rate: ${p.rate}% • ${p.term} months</div>
+      <div style="margin-top:8px"><button class="btn" onclick='applyPlan("${p.id}")'>Apply Plan</button></div>`;
+    area.appendChild(box);
+  });
+}
+
+function applyFromMarket(id){
+  const market = DB.get('market')||[]; const offer = market.find(m=> m.id==id);
+  if(!offer) return alert('Offer gone');
+  const name = prompt('Your full name'); const email = prompt('Your email');
+  if(!name || !email) return alert('Required');
+  createLoanFromOffer(offer, name, email);
+}
+
+function applyPlan(planId){
+  const plan = PLANS.find(p=> p.id===planId);
+  if(!plan) return;
+  const name = prompt('Your full name'); const email = prompt('Your email');
+  if(!name || !email) return alert('Required');
+  createLoanFromOffer(plan, name, email);
+}
+
+function createLoanFromOffer(offer, name, email){
+  const P = Number(offer.principal);
+  const annualRate = Number(offer.rate);
+  const n = Number(offer.term);
+  const monthlyRate = annualRate/100/12;
+  let emi = 0;
+  if(monthlyRate === 0) emi = P/n; else emi = (P*monthlyRate)/(1-Math.pow(1+monthlyRate,-n));
+  emi = Math.round(emi*100)/100;
+  let balance = P; const schedule=[];
+  for(let i=1;i<=n;i++){
+    const interest = Math.round(balance*monthlyRate*100)/100;
+    const principal = Math.round((emi - interest)*100)/100;
+    balance = Math.round(Math.max(0, balance - principal)*100)/100;
+    schedule.push({month:i,payment:emi,interest,principal,balance,paid:false});
+  }
+  const loan = {id:Date.now(), title:offer.title, principal:P, rate:annualRate, termMonths:n, emi, borrowerName:name, borrowerEmail:email, schedule, status:'applied', createdAt:Date.now()};
+  const loans = DB.get('loans')||[]; loans.push(loan); DB.set('loans', loans);
+  let users = DB.get('users')||[]; if(!users.find(u=> u.email===email)){ users.push({name,email,role:'borrower'}); DB.set('users', users) }
+  alert('Application created. Upload required documents (Borrower section). Admin must accept documents before disbursal.');
+  renderMyLoans();
+  renderRecentLoans(); renderAdminLoans(); refreshMetrics();
+}
+
+/* Document upload (borrower) */
+$('#uploadDoc').addEventListener('click', ()=> {
+  const name = $('#bName').value.trim(); const email = $('#bEmail').value.trim();
+  const file = $('#bFile').files[0];
+  if(!name || !email) return $('#uploadMsg').textContent = 'Enter name & email';
+  if(!file) return $('#uploadMsg').textContent = 'Select a file';
+  const allowed = ['application/pdf','image/png','image/jpeg'];
+  if(!allowed.includes(file.type)) return $('#uploadMsg').textContent = 'Only PDF/JPG/PNG allowed';
+  if(file.size > 4*1024*1024) return $('#uploadMsg').textContent = 'File too large (max 4MB)';
+  const reader = new FileReader();
+  reader.onload = ()=> {
+    const data = reader.result;
+    const pending = DB.get('pendingDocs')||[]; pending.push({id:Date.now(), name:file.name, type:file.type, data, borrower:name, borrowerEmail:email, date:Date.now()});
+    DB.set('pendingDocs', pending);
+    let users = DB.get('users')||[]; if(!users.find(u=> u.email===email)) { users.push({name,email,role:'borrower'}); DB.set('users', users) }
+    $('#uploadMsg').textContent = 'Uploaded and queued for admin review';
+    $('#bFile').value = ''; refreshMetrics(); renderPendingQueue();
+  };
+  reader.readAsDataURL(file);
+});
+
+/* =========================
+   Borrower: show my loans & credit score
+   ========================= */
+function renderMyLoans(){
+  const email = $('#bEmail').value.trim() || '';
+  const loans = DB.get('loans')||[]; const my = email? loans.filter(l=> l.borrowerEmail===email) : loans.slice(-6).reverse();
+  const container = $('#myLoans'); container.innerHTML='';
+  if(!my.length) container.innerHTML='<div class="small">No loans for this email (enter email above and click Refresh)</div>';
+  my.forEach(l=>{
+    const el = document.createElement('div'); el.className='item';
+    const paidCount = l.schedule.filter(s=> s.paid).length;
+    el.innerHTML = `<div><strong>${escapeHtml(l.title)}</strong><div class="small">EMI: ₹${l.emi} • ${l.termMonths} months • Paid ${paidCount}/${l.termMonths}</div></div>
+      <div style="margin-top:8px" class="actions">
+        <button class="btn" onclick="simulatePay(${l.id})">Pay next EMI</button>
+      </div>`;
+    container.appendChild(el);
+  });
+  updateCreditScore(email);
+}
+function simulatePay(loanId){
+  let loans = DB.get('loans')||[]; const loan = loans.find(l=> l.id==loanId);
+  if(!loan) return alert('Loan not found');
+  const next = loan.schedule.find(s=> !s.paid);
+  if(!next) return alert('All paid');
+  next.paid = true; next.paidAt = Date.now();
+  const txs = DB.get('transactions')||[]; txs.push({id:Date.now(),loanId:loan.id,amount:next.payment,month:next.month,at:Date.now(),by:loan.borrowerEmail}); DB.set('transactions',txs);
+  DB.set('loans', loans);
+  animateBtn(document.querySelector(`button[onclick="simulatePay(${loanId})"]`));
+  alert(`Payment recorded for month ${next.month}`);
+  renderMyLoans(); renderAdminLoans(); refreshMetrics();
+  updateCreditScore(loan.borrowerEmail);
+}
+
+/* credit score logic */
+function updateCreditScore(email){
+  if(!email) { $('#scoreVal').textContent = '—'; return; }
+  const loans = DB.get('loans')||[]; const userLoans = loans.filter(l=> l.borrowerEmail===email);
+  let score = 500;
+  const reviewed = DB.get('reviewedDocs')||[]; const userDocs = reviewed.filter(d=> d.borrowerEmail===email);
+  userDocs.forEach(d=> score += (d.status==='accepted'? 40 : -20));
+  userLoans.forEach(l=>{
+    const total = l.schedule.length; const paid = l.schedule.filter(s=> s.paid).length;
+    const ratio = total? paid/total:0;
+    score += Math.round(ratio * 150);
+    if(ratio < 0.5) score -= 40;
+    if(l.rate > 18) score -= 10;
+  });
+  score = Math.max(300, Math.min(850, score));
+  $('#scoreVal').textContent = score;
+  let users = DB.get('users')||[]; const uidx = users.findIndex(u=> u.email===email);
+  if(uidx>-1){ users[uidx].credit = score; DB.set('users', users) }
+}
+
+/* =========================
+   Admin: pending docs review
+   ========================= */
+function renderPendingQueue(){
+  const pending = DB.get('pendingDocs')||[]; const container = $('#pendingQueue'); container.innerHTML='';
+  if(!pending.length) container.innerHTML='<div class="small">No pending documents.</div>';
+  pending.forEach((p,idx)=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(p.name)}</strong><div class="small">From ${escapeHtml(p.borrower)} • ${new Date(p.date).toLocaleString()}</div>
+      <a href="${p.data}" target="_blank" rel="noopener">View</a></div>
+      <div style="margin-top:8px" class="actions">
+        <button class="btn ok" onclick="reviewDoc(${idx}, true)">Accept</button>
+        <button class="btn warn" onclick="reviewDoc(${idx}, false)">Reject</button>
+        <input placeholder="Reason (optional)" id="reason-${p.id}" class="input" style="min-width:180px;">
+      </div>`;
+    container.appendChild(el);
+  });
+}
+function reviewDoc(index, accept){
+  const pending = DB.get('pendingDocs')||[]; const item = pending[index];
+  if(!item) return alert('Not found');
+  const reason = document.getElementById(`reason-${item.id}`)?.value || '';
+  const reviewed = DB.get('reviewedDocs')||[]; reviewed.push({...item, status: accept? 'accepted':'rejected', reason, reviewedAt:Date.now() }); DB.set('reviewedDocs', reviewed);
+  let users = DB.get('users')||[]; const uid = users.findIndex(u=> u.email===item.borrowerEmail);
+  if(uid>-1){ users[uid].docStatus = accept? 'accepted':'rejected'; users[uid].docReason = reason; DB.set('users', users) }
+  pending.splice(index,1); DB.set('pendingDocs', pending);
+  alert('Reviewed');
+  renderPendingQueue(); renderAdminUsers(); refreshMetrics();
+}
+
+/* =========================
+   Admin: Loans & Users listing
+   ========================= */
+function renderAdminLoans(){
+  const loans = DB.get('loans')||[]; const container = $('#adminLoans'); container.innerHTML='';
+  if(!loans.length) container.innerHTML='<div class="small">No loans</div>';
+  loans.forEach(l=>{
+    const el = document.createElement('div'); el.className='item';
+    const paid = l.schedule.filter(s=> s.paid).length;
+    el.innerHTML = `<div><strong>${escapeHtml(l.title)}</strong><div class="small">Borrower: ${escapeHtml(l.borrowerName)} • ₹${l.principal} • ${l.rate}% • ${paid}/${l.termMonths} paid</div></div>`;
+    container.appendChild(el);
+  });
+}
+function renderAdminUsers(){
+  const users = DB.get('users')||[]; const container = $('#adminUsers'); container.innerHTML='';
+  if(!users.length) container.innerHTML='<div class="small">No users</div>';
+  users.forEach(u=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(u.name)}</strong><div class="small">${escapeHtml(u.email)} • role: ${escapeHtml(u.role||'n/a')} • credit: ${u.credit||'—'}</div></div>`;
+    container.appendChild(el);
+  });
+}
+
+/* =========================
+   HR: manage users
+   ========================= */
+function renderHRUsers(){
+  const users = DB.get('users')||[]; const container = $('#hrUsers'); container.innerHTML='';
+  if(!users.length) container.innerHTML='<div class="small">No users</div>';
+  users.forEach((u,idx)=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(u.name)}</strong><div class="small">${escapeHtml(u.email)} • role: ${escapeHtml(u.role||'—')} • credit: ${u.credit||'—'}</div></div>
+      <div style="margin-top:8px" class="actions">
+        <button class="btn" onclick="setUserRole(${idx})">Set Role</button>
+        <button class="btn danger" onclick="deleteUser(${idx})">Delete</button>
+      </div>`;
+    container.appendChild(el);
+  });
+}
+function setUserRole(i){
+  const users = DB.get('users')||[]; const role = prompt('Enter role (admin,lender,borrower,hr,analyst)', users[i].role || '');
+  if(!role) return; users[i].role = role; DB.set('users', users); renderHRUsers(); renderAdminUsers();
+}
+function deleteUser(i){
+  let users = DB.get('users')||[]; users.splice(i,1); DB.set('users', users); renderHRUsers(); renderAdminUsers();
+}
+
+/* =========================
+   Analyst: draw simple chart & exports
+   ========================= */
+function drawAnalyst(){
+  const canvas = document.getElementById('analystCanvas'); if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const loans = DB.get('loans')||[]; const total = loans.reduce((s,l)=> s + (l.principal||0),0);
+  const count = loans.length;
+  // simple bar + text
+  ctx.fillStyle = '#e8f2ff'; ctx.fillRect(36,120,120, Math.min(140, total/1500));
+  ctx.fillStyle = '#0b76ff'; ctx.fillRect(36,120,120, Math.min(140, (total/1500) * 0.85));
+  ctx.fillStyle = '#111'; ctx.font='14px Inter, Arial'; ctx.fillText('Total Principal: ₹'+total,180,36);
+  ctx.fillText('Loan count: '+count,180,64);
+}
+
+/* CSV export */
+function exportCSV(type){
+  if(type==='loans'){
+    const loans = DB.get('loans')||[]; let csv='id,title,principal,rate,term,emi,borrowerEmail\n';
+    loans.forEach(l=> csv+=`${l.id},"${l.title}",${l.principal},${l.rate},${l.termMonths},${l.emi},"${l.borrowerEmail||''}"\n`);
+    download(csv,'loans.csv','text/csv');
+  } else {
+    const txs = DB.get('transactions')||[]; let csv='id,loanId,amount,month,at,by\n';
+    txs.forEach(t=> csv+=`${t.id},${t.loanId},${t.amount},${t.month},${t.at},${t.by}\n`);
+    download(csv,'payments.csv','text/csv');
+  }
+}
+function download(data,filename,type){
+  const blob = new Blob([data],{type}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+}
+
+/* =========================
+   Misc & initial render
+   ========================= */
+function refreshAll(){
+  refreshMetrics();
+  renderRecentLoans();
+  renderDashPending();
+  renderOffers();
+  renderMarket();
+  renderMyLoans();
+  renderPendingQueue();
+  renderAdminLoans(); renderAdminUsers();
+  renderHRUsers();
+  renderPlans();
+  drawAnalyst();
+}
+
+function renderBorrowMarket(){
+  const market = DB.get('market')||[]; const cont = $('#borrowMarket'); cont.innerHTML='';
+  if(!market.length) cont.innerHTML='<div class="small">No market offers</div>';
+  market.forEach(m=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `<div><strong>${escapeHtml(m.title)}</strong><div class="small">₹${m.principal} • ${m.rate}% • ${m.term} months</div></div>
+      <div style="margin-top:8px" class="actions"><button class="btn primary" onclick="applyFromMarket(${m.id})">Apply</button></div>`;
+    cont.appendChild(el);
+  });
+}
+
+function renderBorrowMarketAndOffers(){ renderMarket(); renderBorrowMarket(); }
+
+$('#exportLoans')?.addEventListener('click', ()=> exportCSV('loans'));
+$('#exportPayments')?.addEventListener('click', ()=> exportCSV('payments'));
+
+window.onload = ()=> {
+  // make a tiny visual ready transition
+  document.querySelector('.app').classList.add('ready');
+  refreshAll(); renderBorrowMarketAndOffers();
+  // progressive fade-up for header items
+  document.querySelectorAll('.fade-up').forEach(el=> el.style.opacity=1);
+};
+
+/* ---- expose a few helpers to inline onclick attributes ---- */
+window.publishOffer = publishOffer;
+window.applyFromMarket = applyFromMarket;
+window.simulatePay = simulatePay;
+window.setUserRole = setUserRole;
+window.deleteUser = deleteUser;
+window.reviewDoc = reviewDoc;
+window.applyPlan = applyPlan;
+
+/* =========================
+   Small UI niceties: ripple & animateBtn
+   ========================= */
+function animateBtn(el){
+  if(!el) return;
+  el.classList.add('pulse');
+  setTimeout(()=> el.classList.remove('pulse'), 420);
+}
+document.addEventListener('click', function(e){
+  const tgt = e.target.closest('.btn');
+  if(!tgt) return;
+  // ripple effect
+  const rect = tgt.getBoundingClientRect();
+  const r = document.createElement('span'); r.className='ripple';
+  r.style.left = (e.clientX - rect.left) + 'px';
+  r.style.top = (e.clientY - rect.top) + 'px';
+  tgt.appendChild(r);
+  setTimeout(()=> r.remove(), 800);
+});
+
+/* =========================
+   Cursor implementation
+   - ring follows pointer with slight lag
+   - dot exactly on pointer
+   - hides on keyboard navigation
+======================== */
+const ring = document.getElementById('cursorRing');
+const dot = document.getElementById('cursorDot');
+let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+let ringX = mouseX, ringY = mouseY;
+let lastMoveAt = Date.now();
+
+window.addEventListener('pointermove', (e) => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  ring.style.left = mouseX + 'px'; ring.style.top = mouseY + 'px';
+  dot.style.left = mouseX + 'px'; dot.style.top = mouseY + 'px';
+  document.documentElement.dataset.inputMode = 'pointer';
+  lastMoveAt = Date.now();
+});
+window.addEventListener('pointerdown', ()=> {
+  ring.classList.add('cursor-ring--large');
+  setTimeout(()=> ring.classList.remove('cursor-ring--large'), 260);
+});
+window.addEventListener('pointerup', ()=> { /* no-op for now */ });
+
+/* Hide cursor while typing or using keyboard (helps a11y) */
+window.addEventListener('keydown', (e) => {
+  document.documentElement.dataset.inputMode = 'keyboard';
+});
+window.addEventListener('mousedown', () => {
+  document.documentElement.dataset.inputMode = 'pointer';
+});
+
+/* Anchor hover effects: grow ring */
+$all('a, button, .btn, .nav-btn, input, select, textarea').forEach(el=>{
+  el.addEventListener('mouseenter', ()=> ring.classList.add('cursor-ring--small'));
+  el.addEventListener('mouseleave', ()=> ring.classList.remove('cursor-ring--small'));
+});
+
+/* utility: sanitize simple text to avoid accidental markup in inserted HTML */
+function escapeHtml(str){
+  if(!str && str !== 0) return '';
+  return String(str).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); });
+}
+
+/* small accessibility: toggle panels with keyboard numbers 1-6 */
+window.addEventListener('keydown', (e) => {
+  if(e.altKey || e.ctrlKey || e.metaKey) return;
+  if(e.key >= '1' && e.key <= '6'){
+    const idx = parseInt(e.key,10)-1;
+    const btn = navBtns[idx];
+    if(btn) btn.click();
+  }
+});
+</script>
+</body>
+</html>

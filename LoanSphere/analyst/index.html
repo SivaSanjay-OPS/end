@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Analyst — LoanSphere</title>
+
+  <link rel="stylesheet" href="../css/common.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link rel="stylesheet" href="analyst.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Financial Analyst</h1>
+      <div class="row">
+        <button id="homeBtn">Home</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Portfolio Summary</h2>
+        <canvas id="summaryChart" width="800" height="240"></canvas>
+        <div id="summaryText" style="margin-top:10px;"></div>
+      </section>
+
+      <section class="card">
+        <h2>Risk & Credit Scores</h2>
+        <div id="scoresArea"></div>
+      </section>
+
+      <section class="card">
+        <h2>Export / Reports</h2>
+        <div class="row" style="margin-top:8px">
+          <button id="exportCsv" class="btn-float">Export Loans CSV</button>
+          <button id="exportPayments" class="btn-float">Export Payments CSV</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/common.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="analyst.js"></script>
+</body>
+</html>

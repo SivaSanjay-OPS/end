@@ -1,0 +1,35 @@
+/* borrower.css - styles for borrower dashboard */
+
+#market .item {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #f0eefe;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg,#fff,#fbfbff);
+}
+
+#market .item strong { font-size: 15px; }
+
+.apply-btn {
+  margin-top: 8px;
+  background: #0baf7b;
+  color: white;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.apply-btn:hover { transform: translateY(-3px); }
+
+#myLoans .loan {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #eef7ef;
+  margin-bottom: 10px;
+  background: #fcfffb;
+}
+
+.loan small { color: #444; }
+
+.schedule-row { margin-top:8px; font-size:13px; color:#333; }

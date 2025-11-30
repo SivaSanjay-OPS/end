@@ -1,0 +1,7 @@
+/* analyst.css - visual polish for the analyst dashboard */
+
+canvas { display:block; width:100%; max-width:100%; background:linear-gradient(180deg,#ffffff,#fbfdff); border-radius:8px; border:1px solid #eef6ff; padding:8px; }
+#summaryText { font-size:14px; color:#333; }
+#scoresArea .score-card { padding:10px; border-radius:8px; border:1px solid #eef4fb; margin-bottom:8px; background:#fff; }
+#scoresArea .score-card strong { display:block; font-size:15px; margin-bottom:6px; }
+#scoresArea .score-meta { font-size:13px; color:#555; }

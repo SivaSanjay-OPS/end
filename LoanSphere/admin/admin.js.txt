@@ -1,0 +1,134 @@
+// admin.js
+// Admin dashboard behaviour: review pending docs, view loans, view users
+
+document.getElementById('homeBtn').addEventListener('click', () => {
+  location.href = '../index.html';
+});
+
+async function renderPending() {
+  const pending = LS.get('pendingDocs') || [];
+  const container = document.getElementById('pendingList');
+  container.innerHTML = '';
+
+  if (!pending.length) {
+    container.innerHTML = '<p class="small-muted">No pending documents.</p>';
+    return;
+  }
+
+  pending.forEach((p, idx) => {
+    const box = document.createElement('div');
+    box.className = 'pending-item fade-in';
+
+    const left = document.createElement('div');
+    left.innerHTML = `<div class="pending-meta"><strong>${p.name}</strong> — ${p.type}</div>
+                      <div class="small-muted">Borrower: ${p.borrower} — ${p.borrowerEmail}</div>
+                      <div style="margin-top:6px"><a href="${p.data}" target="_blank" rel="noreferrer">View file</a></div>
+                      <div class="small-muted">Submitted: ${new Date(p.date).toLocaleString()}</div>`;
+
+    const right = document.createElement('div');
+    right.className = 'action-block';
+
+    const acceptBtn = document.createElement('button');
+    acceptBtn.textContent = 'Accept';
+    acceptBtn.onclick = () => reviewDocument(idx, true);
+
+    const rejectBtn = document.createElement('button');
+    rejectBtn.textContent = 'Reject';
+    rejectBtn.onclick = () => reviewDocument(idx, false);
+
+    const reason = document.createElement('textarea');
+    reason.placeholder = 'Rejection reason (optional)';
+
+    right.appendChild(acceptBtn);
+    right.appendChild(rejectBtn);
+    right.appendChild(reason);
+
+    box.appendChild(left);
+    box.appendChild(right);
+    container.appendChild(box);
+  });
+}
+
+async function reviewDocument(index, accepted) {
+  const pending = LS.get('pendingDocs') || [];
+  const item = pending[index];
+  if (!item) return alert('Item not found');
+
+  // Grab the corresponding textarea value (simple mapping by index)
+  const textarea = document.querySelectorAll('.action-block textarea')[index];
+  const reason = textarea ? textarea.value.trim() : '';
+
+  // Add to reviewed records
+  const reviewed = LS.get('reviewedDocs') || [];
+  reviewed.push({
+    ...item,
+    status: accepted ? 'accepted' : 'rejected',
+    reason,
+    reviewedAt: Date.now()
+  });
+  LS.set('reviewedDocs', reviewed);
+
+  // Update user doc status
+  const users = LS.get('users') || [];
+  const uidx = users.findIndex(u => u.email === item.borrowerEmail);
+  if (uidx > -1) {
+    users[uidx].docStatus = accepted ? 'accepted' : 'rejected';
+    users[uidx].docReason = reason;
+    LS.set('users', users);
+  }
+
+  // Remove from pending
+  pending.splice(index, 1);
+  LS.set('pendingDocs', pending);
+
+  // Re-render
+  await renderPending();
+  await renderUsers();
+  await renderLoans();
+}
+
+async function renderLoans() {
+  const loans = LS.get('loans') || [];
+  const container = document.getElementById('loansList');
+  container.innerHTML = '';
+
+  if (!loans.length) {
+    container.innerHTML = '<p class="small-muted">No loans found.</p>';
+    return;
+  }
+
+  loans.forEach(l => {
+    const el = document.createElement('div');
+    el.className = 'loan-card';
+    el.innerHTML = `<strong>${l.title}</strong>
+      <div class="small-muted">Borrower: ${l.borrowerName || '—'} (${l.borrowerEmail || '—'})</div>
+      <div style="margin-top:6px"><small>Principal: ₹${l.principal} | Rate: ${l.rate}% | Term: ${l.termMonths} months</small></div>
+      <div style="margin-top:6px"><small>Status: ${l.status || '—'}</small></div>`;
+    container.appendChild(el);
+  });
+}
+
+async function renderUsers() {
+  const users = LS.get('users') || [];
+  const container = document.getElementById('usersList');
+  container.innerHTML = '';
+
+  if (!users.length) {
+    container.innerHTML = '<p class="small-muted">No users.</p>';
+    return;
+  }
+
+  users.forEach(u => {
+    const el = document.createElement('div');
+    el.className = 'user-card';
+    el.innerHTML = `<strong>${u.name}</strong>
+                    <div class="small-muted">${u.email} — role: ${u.role || 'n/a'}</div>
+                    <div class="small-muted">Doc status: ${u.docStatus || 'none'}</div>`;
+    container.appendChild(el);
+  });
+}
+
+// Initial render
+renderPending();
+renderLoans();
+renderUsers();

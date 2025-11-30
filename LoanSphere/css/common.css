@@ -1,0 +1,85 @@
+/* === COMMON BASE STYLES === */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: linear-gradient(120deg, #eaf4ff, #fff9f2);
+  color: #222;
+  min-height: 100vh;
+}
+
+/* Main layout container */
+.wrap {
+  max-width: 1100px;
+  margin: 28px auto;
+  padding: 20px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(10,10,30,0.06);
+}
+
+/* Header style */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+/* Title */
+h1 {
+  font-size: 22px;
+  letter-spacing: 0.8px;
+}
+
+/* Role selector */
+.role-select {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Form elements */
+select, button, input, textarea {
+  font: inherit;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #d6e2ef;
+}
+
+button {
+  background: #0b76ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+/* Card UI */
+.card {
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #eef4fb;
+  box-shadow: 0 6px 20px rgba(10,10,30,0.03);
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+small {
+  font-size: 13px;
+  color: #555;
+}

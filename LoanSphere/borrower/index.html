@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Borrower — LoanSphere</title>
+
+  <link rel="stylesheet" href="../css/common.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link rel="stylesheet" href="borrower.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Borrower Dashboard</h1>
+      <div class="row">
+        <button id="homeBtn">Home</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Marketplace — Available Offers</h2>
+        <div id="market"></div>
+      </section>
+
+      <section class="card">
+        <h2>My Loans & Payments</h2>
+        <div id="myLoans"></div>
+      </section>
+
+      <section class="card">
+        <h2>Upload Documents (PDF / JPG / PNG)</h2>
+        <div class="row" style="margin-top:8px;">
+          <input id="name" placeholder="Your full name" />
+          <input id="email" placeholder="Your email" />
+        </div>
+        <div style="margin-top:8px;">
+          <input id="fileInput" type="file" accept=".pdf,image/png,image/jpeg" />
+          <button id="upload" class="btn-float">Upload</button>
+        </div>
+        <small>Files are stored in browser localStorage as Base64 for demo only.</small>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/common.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="borrower.js"></script>
+</body>
+</html>
